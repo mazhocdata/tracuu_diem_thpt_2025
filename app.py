@@ -326,16 +326,14 @@ st.markdown("""
 def load_data():
     return pd.read_csv("lookup_2025.csv")
 
-def create_animated_metric_card(title, value, delta=None, icon="📊", extra_info=""):
+def create_animated_metric_card(title, value, delta=None, icon="📊"):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
-    extra_info_html = f'<div style="font-size: 0.8rem; color: #666; margin-top: 0.3rem;">{extra_info}</div>' if extra_info else ""
     
     return f"""
     <div class="metric-card fade-in">
         <div class="metric-title">{icon} {title}</div>
         <div class="metric-value">{value}</div>
         {delta_html}
-        {extra_info_html}
     </div>
     """
 
@@ -534,22 +532,24 @@ if lookup_button:
             total_students = df_region['count_exact'].sum()
             
             with [col1, col2, col3][i]:
-                st.metric(
-                    label=f"{icon} Top % - {region}",
-                    value=f"{result['top_percent']:.1f}%",
-                    delta=f"Tổng: {total_students:,} thí sinh"
-                )
+                st.markdown(create_animated_metric_card(
+                    f"Top % - {region}",
+                    f"{result['top_percent']:.1f}%",
+                    delta=f"Tổng: {total_students:,} thí sinh",
+                    icon=icon
+                ), unsafe_allow_html=True)
     
     with col4:
         # Get ranking compared to entire country
         country_result = results['Cả nước']
         ranking_info = f"#{country_result['rank']:,} / {country_result['total']:,}" if country_result else "N/A"
         
-        st.metric(
-            label="🎯 Điểm của bạn",
-            value=f"{diem_input:.2f}",
-            delta=f"Xếp hạng: {ranking_info}"
-        )
+        st.markdown(create_animated_metric_card(
+            "Điểm của bạn",
+            f"{diem_input:.2f}",
+            delta=f"Xếp hạng: {ranking_info}",
+            icon="🎯"
+        ), unsafe_allow_html=True)
     
     # Detailed results for each region with histogram
     for region, icon in zip(regions, region_icons):
