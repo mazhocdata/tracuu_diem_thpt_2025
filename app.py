@@ -24,6 +24,40 @@ st.markdown("""
         font-family: 'League Spartan', sans-serif;
     }
     
+    /* Info Header Styles */
+    .info-header {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        text-align: center;
+        color: white;
+        box-shadow: 0 3px 10px rgba(44, 62, 80, 0.3);
+        font-size: 0.9rem;
+    }
+    
+    .info-header a {
+        color: #3498db;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .info-header a:hover {
+        color: #5dade2;
+        text-decoration: underline;
+    }
+    
+    .author-name {
+        color: #f39c12;
+        font-weight: 700;
+    }
+    
+    .company-name {
+        color: #e74c3c;
+        font-weight: 600;
+    }
+
     /* Header Styles */
     .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -375,6 +409,16 @@ def get_icon(icon_type):
 
 # Load data
 df = load_data()
+
+# Info Header
+st.markdown("""
+<div class="info-header">
+    📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of <span class="company-name">MazHocData</span> | 
+    <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank">
+        🔗 Khám phá khóa học Power BI của tôi
+    </a>
+</div>
+""", unsafe_allow_html=True)
 
 # Header
 st.markdown(f"""
