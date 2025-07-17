@@ -145,7 +145,7 @@ st.markdown("""
     .region-title {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #333;
+        color: #333 !important;
         margin: 0;
     }
     
@@ -282,6 +282,18 @@ st.markdown("""
             padding: 1rem;
         }
         
+        .region-title {
+            color: #333 !important;
+            font-size: 1.3rem;
+        }
+        
+        .region-header {
+            background: rgba(0,0,0,0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+        
         .stTabs [data-baseweb="tab"] {
             min-width: 150px;
             font-size: 1rem;
@@ -413,7 +425,6 @@ st.markdown("""
 <div class="info-header">
     📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of 
     <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank" class="company-name">MazHocData</a> | 
-    <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank" class="company-name">Data analytics course</a> | 
     <a href="https://www.linkedin.com/in/ntrunghieu/" target="_blank">💼 LinkedIn</a>
 </div>
 """, unsafe_allow_html=True)
@@ -422,7 +433,7 @@ st.markdown("""
 st.markdown(f"""
 <div class="main-header">
     <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
-    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc</p>
+    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -552,7 +563,7 @@ else:
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
-        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi!</h2>
+        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
         <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
             Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
             để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
@@ -571,7 +582,7 @@ else:
 st.markdown("---")
 st.markdown(f"""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng bởi Hieu Nguyen</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ bằng Streamlit</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
