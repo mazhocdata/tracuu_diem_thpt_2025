@@ -10,7 +10,7 @@ st.set_page_config(
     page_title="Tra cứu điểm thi 2025",
     page_icon="🎯",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # Custom CSS for modern UI with League Spartan font
@@ -168,37 +168,68 @@ st.markdown("""
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
     
+    /* Force sidebar toggle button to be visible */
+    [data-testid="collapsedControl"] {
+        display: block !important;
+        color: #667eea !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+        border-radius: 50% !important;
+        padding: 0.5rem !important;
+    }
+    
+    /* Sidebar header styling */
+    .css-1d391kg {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+    
     /* Input Styles */
     .stSelectbox > div > div > div {
-        background: white;
+        background: white !important;
         border-radius: 10px;
         font-family: 'League Spartan', sans-serif;
         color: #333 !important;
+        border: 2px solid #667eea !important;
     }
     
     .stSelectbox > div > div > div > div {
         color: #333 !important;
+        font-weight: 500 !important;
     }
     
     .stSelectbox label {
-        color: #333 !important;
+        color: white !important;
+        font-weight: 700 !important;
+        background: #667eea;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: inline-block;
     }
     
     .stNumberInput > div > div > input {
         border-radius: 10px;
-        border: 2px solid #e9ecef;
+        border: 2px solid #667eea !important;
         transition: border-color 0.3s ease;
         font-family: 'League Spartan', sans-serif;
         color: #333 !important;
+        background: white !important;
+        font-weight: 500 !important;
     }
     
     .stNumberInput > div > div > input:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #764ba2;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
     
     .stNumberInput label {
-        color: #333 !important;
+        color: white !important;
+        font-weight: 700 !important;
+        background: #667eea;
+        padding: 0.3rem 0.8rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        display: inline-block;
     }
     
     /* Button Styles */
@@ -337,17 +368,51 @@ st.markdown("""
         .stSelectbox > div > div > div {
             background: white !important;
             color: #333 !important;
-            border: 1px solid #ddd;
+            border: 2px solid #667eea !important;
+            font-weight: 600 !important;
         }
         
         .stSelectbox label {
-            color: #333 !important;
-            font-weight: 600;
+            color: white !important;
+            font-weight: 700 !important;
+            background: #667eea !important;
+            padding: 0.4rem 0.8rem !important;
+            border-radius: 8px !important;
+            margin-bottom: 0.5rem !important;
+            display: inline-block !important;
         }
         
         .stNumberInput label {
+            color: white !important;
+            font-weight: 700 !important;
+            background: #667eea !important;
+            padding: 0.4rem 0.8rem !important;
+            border-radius: 8px !important;
+            margin-bottom: 0.5rem !important;
+            display: inline-block !important;
+        }
+        
+        .stNumberInput > div > div > input {
+            background: white !important;
             color: #333 !important;
-            font-weight: 600;
+            font-weight: 600 !important;
+            border: 2px solid #667eea !important;
+        }
+        
+        /* Force sidebar toggle visibility on mobile */
+        [data-testid="collapsedControl"] {
+            display: block !important;
+            position: fixed !important;
+            top: 1rem !important;
+            left: 1rem !important;
+            z-index: 999999 !important;
+            background: #667eea !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 3rem !important;
+            height: 3rem !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
         }
     }
 </style>
@@ -519,10 +584,6 @@ with st.sidebar:
 
 # Main content
 if lookup_button:
-    # Keep sidebar open on mobile after search
-    if st.session_state.get('mobile_searched', False):
-        st.sidebar.empty()
-    st.session_state['mobile_searched'] = True
     def format_region_result(df, diem_input, region):
         df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
         df_region = df_region.sort_values('diem_moc')
@@ -633,8 +694,6 @@ if lookup_button:
     st.markdown('</div>', unsafe_allow_html=True)
 
 else:
-    # Reset mobile search state when not searching
-    st.session_state['mobile_searched'] = False
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
