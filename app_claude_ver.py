@@ -180,7 +180,7 @@ st.markdown("""
         animation: fadeIn 0.6s ease-out;
     }
     
-    /* Hide GitHub and menu buttons */
+    /* Hide ONLY GitHub-related buttons, keep app functionality */
     [data-testid="stToolbar"] {
         display: none !important;
     }
@@ -193,11 +193,6 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Hide hamburger menu */
-    [data-testid="stSidebarNav"] {
-        display: none !important;
-    }
-    
     /* Hide "Made with Streamlit" footer */
     footer {
         display: none !important;
@@ -207,10 +202,7 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Hide settings menu */
-    [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] [data-testid="stElementContainer"]:last-child {
-        display: none !important;
-    }
+    /* Keep sidebar functionality - remove the problematic CSS */
     
     /* Responsive */
     @media (max-width: 768px) {
