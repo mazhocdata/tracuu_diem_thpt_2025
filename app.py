@@ -326,14 +326,16 @@ st.markdown("""
 def load_data():
     return pd.read_csv("lookup_2025.csv")
 
-def create_animated_metric_card(title, value, delta=None, icon="📊"):
+def create_animated_metric_card(title, value, delta=None, icon="📊", extra_info=""):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
+    extra_info_html = f'<div class="metric-extra" style="font-size: 0.8rem; color: #666; margin-top: 0.3rem;">{extra_info}</div>' if extra_info else ""
     
     return f"""
     <div class="metric-card fade-in">
         <div class="metric-title">{icon} {title}</div>
         <div class="metric-value">{value}</div>
         {delta_html}
+        {extra_info_html}
     </div>
     """
 
@@ -527,18 +529,29 @@ if lookup_button:
     for i, (region, icon) in enumerate(zip(regions, region_icons)):
         result = results[region]
         if result:
+            # Get total students for this region
+            df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)]
+            total_students = df_region['count_exact'].sum()
+            
             with [col1, col2, col3][i]:
                 st.markdown(create_animated_metric_card(
                     f"Top % - {region}",
                     f"{result['top_percent']:.1f}%",
-                    icon=icon
+                    icon=icon,
+                    extra_info=f"Tổng: {total_students:,} thí sinh"
                 ), unsafe_allow_html=True)
     
     with col4:
+        # Get ranking compared to entire country
+        df_country = df[(df['khoi'] == khoi_input) & (df['view'] == 'Cả nước')]
+        country_result = results['Cả nước']
+        ranking_info = f"#{country_result['rank']:,} / {country_result['total']:,}" if country_result else "N/A"
+        
         st.markdown(create_animated_metric_card(
             "Điểm của bạn",
             f"{diem_input:.2f}",
-            icon="🎯"
+            icon="🎯",
+            extra_info=f"Xếp hạng: {ranking_info}"
         ), unsafe_allow_html=True)
     
     # Detailed results for each region with histogram
