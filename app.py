@@ -423,7 +423,7 @@ def create_region_histogram(df, khoi_input, region, diem_input):
         )
     
     fig.update_layout(
-        title=f"Phổ điểm thi - Khối D1 ({region})",
+        title=f"Phổ điểm thi - Khối {khoi_input} ({region})",
         xaxis_title="Tổng điểm",
         yaxis_title="Số thí sinh",
         height=400,
@@ -460,6 +460,8 @@ def get_region_subtext(region):
         'Miền Nam': 'Các tỉnh thành từ Đà Nẵng trở vô Nam'
     }
     return subtexts.get(region, '')
+
+def get_icon(icon_type):
     icons = {
         "target": "🎯",
         "world": "🌍", 
@@ -523,6 +525,7 @@ if lookup_button:
     if st.session_state.get('mobile_searched', False):
         st.sidebar.empty()
     st.session_state['mobile_searched'] = True
+    
     def format_region_result(df, diem_input, region):
         df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
         df_region = df_region.sort_values('diem_moc')
