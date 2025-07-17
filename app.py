@@ -168,6 +168,34 @@ st.markdown("""
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
     
+    /* Custom sidebar toggle button */
+    .custom-sidebar-toggle {
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 999999;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-family: 'League Spartan', sans-serif;
+        font-weight: 600;
+    }
+    
+    .custom-sidebar-toggle:hover {
+        background: #764ba2;
+        transform: scale(1.05);
+        transition: all 0.3s ease;
+    }
+    
     /* Ensure sidebar toggle is always visible */
     [data-testid="collapsedControl"] {
         display: block !important;
@@ -358,6 +386,10 @@ st.markdown("""
         }
         
         /* Force sidebar toggle button visibility on mobile */
+        .custom-sidebar-toggle {
+            display: flex !important;
+        }
+        
         [data-testid="collapsedControl"] {
             display: block !important;
             position: fixed !important;
@@ -502,6 +534,41 @@ def get_icon(icon_type):
 
 # Load data
 df = load_data()
+
+# Add custom sidebar toggle for mobile
+st.markdown("""
+<button class="custom-sidebar-toggle" onclick="
+    const sidebar = parent.document.querySelector('[data-testid=stSidebar]');
+    const button = parent.document.querySelector('[data-testid=collapsedControl]');
+    if (sidebar) {
+        if (sidebar.style.transform === 'translateX(-100%)' || sidebar.style.transform === '') {
+            sidebar.style.transform = 'translateX(0%)';
+            sidebar.style.transition = 'transform 0.3s ease';
+        } else {
+            sidebar.style.transform = 'translateX(-100%)';
+        }
+    } else if (button) {
+        button.click();
+    }
+">☰</button>
+
+<script>
+// Auto-hide custom button if native toggle is visible
+function checkToggleVisibility() {
+    const nativeToggle = parent.document.querySelector('[data-testid=collapsedControl]');
+    const customToggle = parent.document.querySelector('.custom-sidebar-toggle');
+    
+    if (nativeToggle && customToggle) {
+        const isNativeVisible = window.getComputedStyle(nativeToggle).display !== 'none';
+        customToggle.style.display = isNativeVisible ? 'none' : 'flex';
+    }
+}
+
+// Check periodically
+setInterval(checkToggleVisibility, 1000);
+checkToggleVisibility();
+</script>
+""", unsafe_allow_html=True)
 
 # Info Header
 st.markdown("""
