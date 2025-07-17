@@ -180,6 +180,38 @@ st.markdown("""
         animation: fadeIn 0.6s ease-out;
     }
     
+    /* Hide GitHub and menu buttons */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
+    
+    .stAppDeployButton {
+        display: none !important;
+    }
+    
+    [data-testid="stDecoration"] {
+        display: none !important;
+    }
+    
+    /* Hide hamburger menu */
+    [data-testid="stSidebarNav"] {
+        display: none !important;
+    }
+    
+    /* Hide "Made with Streamlit" footer */
+    footer {
+        display: none !important;
+    }
+    
+    .viewerBadge_container__1QSob {
+        display: none !important;
+    }
+    
+    /* Hide settings menu */
+    [data-testid="stSidebarUserContent"] [data-testid="stVerticalBlock"] [data-testid="stElementContainer"]:last-child {
+        display: none !important;
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
         .main-title {
