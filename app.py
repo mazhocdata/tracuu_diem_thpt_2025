@@ -328,7 +328,7 @@ def load_data():
 
 def create_animated_metric_card(title, value, delta=None, icon="📊", extra_info=""):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
-    extra_info_html = f'<div class="metric-extra" style="font-size: 0.8rem; color: #666; margin-top: 0.3rem;">{extra_info}</div>' if extra_info else ""
+    extra_info_html = f'<div style="font-size: 0.8rem; color: #666; margin-top: 0.3rem;">{extra_info}</div>' if extra_info else ""
     
     return f"""
     <div class="metric-card fade-in">
