@@ -168,6 +168,13 @@ st.markdown("""
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
     
+    /* Ensure sidebar toggle is always visible */
+    [data-testid="collapsedControl"] {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
     /* Input Styles */
     .stSelectbox > div > div > div {
         background: white;
@@ -349,6 +356,24 @@ st.markdown("""
             color: #333 !important;
             font-weight: 600;
         }
+        
+        /* Force sidebar toggle button visibility on mobile */
+        [data-testid="collapsedControl"] {
+            display: block !important;
+            position: fixed !important;
+            top: 1rem !important;
+            left: 1rem !important;
+            z-index: 999999 !important;
+            background: #667eea !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 3rem !important;
+            height: 3rem !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -521,10 +546,6 @@ with st.sidebar:
 
 # Main content
 if lookup_button:
-    # Keep sidebar open on mobile after search
-    if st.session_state.get('mobile_searched', False):
-        st.sidebar.empty()
-    st.session_state['mobile_searched'] = True
     
     def format_region_result(df, diem_input, region):
         df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
@@ -636,8 +657,6 @@ if lookup_button:
     st.markdown('</div>', unsafe_allow_html=True)
 
 else:
-    # Reset mobile search state when not searching
-    st.session_state['mobile_searched'] = False
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
@@ -660,7 +679,7 @@ else:
 st.markdown("---")
 st.markdown(f"""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng HieuNguyen</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ bằng Streamlit</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
