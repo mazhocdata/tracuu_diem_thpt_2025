@@ -26,36 +26,34 @@ st.markdown("""
     
     /* Info Header Styles */
     .info-header {
-        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        padding: 0.8rem 1rem;
-        border-radius: 10px;
+        padding: 0.8rem 0;
         margin-bottom: 1rem;
         text-align: center;
-        color: white;
-        box-shadow: 0 3px 10px rgba(44, 62, 80, 0.3);
+        color: #666;
         font-size: 0.9rem;
+        font-weight: 500;
     }
     
     .info-header a {
-        color: #3498db;
+        color: #667eea;
         text-decoration: none;
         font-weight: 600;
         transition: color 0.3s ease;
     }
     
     .info-header a:hover {
-        color: #5dade2;
+        color: #764ba2;
         text-decoration: underline;
     }
     
     .author-name {
-        color: #f39c12;
+        color: #667eea;
         font-weight: 700;
     }
     
     .company-name {
-        color: #e74c3c;
-        font-weight: 600;
+        color: #764ba2;
+        font-weight: 700;
     }
 
     /* Header Styles */
@@ -413,10 +411,9 @@ df = load_data()
 # Info Header
 st.markdown("""
 <div class="info-header">
-    📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of <span class="company-name">MazHocData</span> | 
-    <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank">
-        🔗 Khám phá khóa học Power BI của tôi
-    </a>
+    📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of 
+    <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank" class="company-name">MazHocData</a> | 
+    <a href="https://www.linkedin.com/in/ntrunghieu/" target="_blank">💼 LinkedIn</a>
 </div>
 """, unsafe_allow_html=True)
 
