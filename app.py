@@ -168,32 +168,34 @@ st.markdown("""
         background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
     }
     
-    /* Custom sidebar toggle button */
-    .custom-sidebar-toggle {
-        position: fixed;
-        top: 1rem;
-        left: 1rem;
-        z-index: 999999;
-        background: #667eea;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 3rem;
-        height: 3rem;
-        font-size: 1.2rem;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-family: 'League Spartan', sans-serif;
-        font-weight: 600;
+    /* Mobile toggle button */
+    .stButton[data-testid="baseButton-secondary"] {
+        position: fixed !important;
+        top: 1rem !important;
+        left: 1rem !important;
+        z-index: 999999 !important;
+        background: #667eea !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 50% !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        min-height: 3rem !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+        display: none !important;
     }
     
-    .custom-sidebar-toggle:hover {
-        background: #764ba2;
-        transform: scale(1.05);
-        transition: all 0.3s ease;
+    .stButton[data-testid="baseButton-secondary"] > button {
+        background: transparent !important;
+        border: none !important;
+        color: white !important;
+        font-size: 1.2rem !important;
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     /* Ensure sidebar toggle is always visible */
@@ -385,6 +387,11 @@ st.markdown("""
             font-weight: 600;
         }
         
+        /* Show mobile toggle button on mobile */
+        .stButton[data-testid="baseButton-secondary"] {
+            display: flex !important;
+        }
+        
         /* Force sidebar toggle button visibility on mobile */
         .custom-sidebar-toggle {
             display: flex !important;
@@ -535,40 +542,15 @@ def get_icon(icon_type):
 # Load data
 df = load_data()
 
-# Add custom sidebar toggle for mobile
-st.markdown("""
-<button class="custom-sidebar-toggle" onclick="
-    const sidebar = parent.document.querySelector('[data-testid=stSidebar]');
-    const button = parent.document.querySelector('[data-testid=collapsedControl]');
-    if (sidebar) {
-        if (sidebar.style.transform === 'translateX(-100%)' || sidebar.style.transform === '') {
-            sidebar.style.transform = 'translateX(0%)';
-            sidebar.style.transition = 'transform 0.3s ease';
-        } else {
-            sidebar.style.transform = 'translateX(-100%)';
-        }
-    } else if (button) {
-        button.click();
-    }
-">☰</button>
+# Mobile sidebar solution using session state
+if 'sidebar_open' not in st.session_state:
+    st.session_state.sidebar_open = True
 
-<script>
-// Auto-hide custom button if native toggle is visible
-function checkToggleVisibility() {
-    const nativeToggle = parent.document.querySelector('[data-testid=collapsedControl]');
-    const customToggle = parent.document.querySelector('.custom-sidebar-toggle');
-    
-    if (nativeToggle && customToggle) {
-        const isNativeVisible = window.getComputedStyle(nativeToggle).display !== 'none';
-        customToggle.style.display = isNativeVisible ? 'none' : 'flex';
-    }
-}
-
-// Check periodically
-setInterval(checkToggleVisibility, 1000);
-checkToggleVisibility();
-</script>
-""", unsafe_allow_html=True)
+# Add custom mobile sidebar toggle
+col_toggle, col_spacer = st.columns([1, 10])
+with col_toggle:
+    if st.button("☰", key="mobile_toggle", help="Mở/đóng menu"):
+        st.session_state.sidebar_open = not st.session_state.sidebar_open
 
 # Info Header
 st.markdown("""
@@ -587,29 +569,44 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
-    st.markdown(f"### 📚 Thiết lập tra cứu")
-    
-    st.markdown("---")
-    
-    # Inputs
-    khoi_input = st.selectbox(
-        "📚 Chọn khối thi",
-        sorted(df['khoi'].unique()),
-        help="Chọn khối thi bạn muốn tra cứu"
-    )
-    
-    diem_input = st.number_input(
-        "🎯 Nhập tổng điểm",
-        min_value=0.0,
-        max_value=30.0,
-        value=21.0,
-        step=0.05,
-        help="Nhập tổng điểm của bạn (0-30)"
-    )
-    
-    lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
+# Sidebar (conditional display for mobile)
+if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False):
+    with st.sidebar:
+        st.markdown(f"### 📚 Thiết lập tra cứu")
+        
+        st.markdown("---")
+        
+        # Inputs
+        khoi_input = st.selectbox(
+            "📚 Chọn khối thi",
+            sorted(df['khoi'].unique()),
+            help="Chọn khối thi bạn muốn tra cứu"
+        )
+        
+        diem_input = st.number_input(
+            "🎯 Nhập tổng điểm",
+            min_value=0.0,
+            max_value=30.0,
+            value=21.0,
+            step=0.05,
+            help="Nhập tổng điểm của bạn (0-30)"
+        )
+        
+        lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
+        
+        # Close sidebar after search on mobile
+        if lookup_button:
+            st.session_state.sidebar_open = False
+            st.session_state.force_sidebar = False
+else:
+    # Create hidden inputs to maintain state
+    khoi_input = st.session_state.get('khoi_input', sorted(df['khoi'].unique())[0])
+    diem_input = st.session_state.get('diem_input', 21.0)
+    lookup_button = st.session_state.get('lookup_button', False)
+
+# Store input values in session state
+st.session_state.khoi_input = khoi_input
+st.session_state.diem_input = diem_input
 
 # Main content
 if lookup_button:
