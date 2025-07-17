@@ -534,25 +534,22 @@ if lookup_button:
             total_students = df_region['count_exact'].sum()
             
             with [col1, col2, col3][i]:
-                st.markdown(create_animated_metric_card(
-                    f"Top % - {region}",
-                    f"{result['top_percent']:.1f}%",
-                    icon=icon,
-                    extra_info=f"Tổng: {total_students:,} thí sinh"
-                ), unsafe_allow_html=True)
+                st.metric(
+                    label=f"{icon} Top % - {region}",
+                    value=f"{result['top_percent']:.1f}%",
+                    delta=f"Tổng: {total_students:,} thí sinh"
+                )
     
     with col4:
         # Get ranking compared to entire country
-        df_country = df[(df['khoi'] == khoi_input) & (df['view'] == 'Cả nước')]
         country_result = results['Cả nước']
         ranking_info = f"#{country_result['rank']:,} / {country_result['total']:,}" if country_result else "N/A"
         
-        st.markdown(create_animated_metric_card(
-            "Điểm của bạn",
-            f"{diem_input:.2f}",
-            icon="🎯",
-            extra_info=f"Xếp hạng: {ranking_info}"
-        ), unsafe_allow_html=True)
+        st.metric(
+            label="🎯 Điểm của bạn",
+            value=f"{diem_input:.2f}",
+            delta=f"Xếp hạng: {ranking_info}"
+        )
     
     # Detailed results for each region with histogram
     for region, icon in zip(regions, region_icons):
