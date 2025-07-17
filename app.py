@@ -169,7 +169,7 @@ st.markdown("""
     }
     
     /* Mobile toggle button */
-    button[data-testid="baseButton-secondary"][aria-label*="Mở/đóng menu"] {
+    .stButton[data-testid="baseButton-secondary"] {
         position: fixed !important;
         top: 1rem !important;
         left: 1rem !important;
@@ -183,16 +183,19 @@ st.markdown("""
         min-height: 3rem !important;
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
         display: none !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 1.2rem !important;
-        font-weight: 600 !important;
     }
     
-    button[data-testid="baseButton-secondary"][aria-label*="Mở/đóng menu"]:hover {
-        background: #764ba2 !important;
-        transform: scale(1.05) !important;
-        transition: all 0.3s ease !important;
+    .stButton[data-testid="baseButton-secondary"] > button {
+        background: transparent !important;
+        border: none !important;
+        color: white !important;
+        font-size: 1.2rem !important;
+        width: 100% !important;
+        height: 100% !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     /* Ensure sidebar toggle is always visible */
@@ -385,7 +388,12 @@ st.markdown("""
         }
         
         /* Show mobile toggle button on mobile */
-        button[data-testid="baseButton-secondary"][aria-label*="Mở/đóng menu"] {
+        .stButton[data-testid="baseButton-secondary"] {
+            display: flex !important;
+        }
+        
+        /* Force sidebar toggle button visibility on mobile */
+        .custom-sidebar-toggle {
             display: flex !important;
         }
         
@@ -534,9 +542,15 @@ def get_icon(icon_type):
 # Load data
 df = load_data()
 
-# Mobile sidebar toggle button
-if st.button("☰", key="mobile_toggle", help="Mở/đóng menu tra cứu"):
-    pass  # Just trigger rerun to show sidebar
+# Mobile sidebar solution using session state
+if 'sidebar_open' not in st.session_state:
+    st.session_state.sidebar_open = True
+
+# Add custom mobile sidebar toggle
+col_toggle, col_spacer = st.columns([1, 10])
+with col_toggle:
+    if st.button("☰", key="mobile_toggle", help="Mở/đóng menu"):
+        st.session_state.sidebar_open = not st.session_state.sidebar_open
 
 # Info Header
 st.markdown("""
@@ -555,29 +569,44 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
-    st.markdown(f"### 📚 Thiết lập tra cứu")
-    
-    st.markdown("---")
-    
-    # Inputs
-    khoi_input = st.selectbox(
-        "📚 Chọn khối thi",
-        sorted(df['khoi'].unique()),
-        help="Chọn khối thi bạn muốn tra cứu"
-    )
-    
-    diem_input = st.number_input(
-        "🎯 Nhập tổng điểm",
-        min_value=0.0,
-        max_value=30.0,
-        value=21.0,
-        step=0.05,
-        help="Nhập tổng điểm của bạn (0-30)"
-    )
-    
-    lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
+# Sidebar (conditional display for mobile)
+if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False):
+    with st.sidebar:
+        st.markdown(f"### 📚 Thiết lập tra cứu")
+        
+        st.markdown("---")
+        
+        # Inputs
+        khoi_input = st.selectbox(
+            "📚 Chọn khối thi",
+            sorted(df['khoi'].unique()),
+            help="Chọn khối thi bạn muốn tra cứu"
+        )
+        
+        diem_input = st.number_input(
+            "🎯 Nhập tổng điểm",
+            min_value=0.0,
+            max_value=30.0,
+            value=21.0,
+            step=0.05,
+            help="Nhập tổng điểm của bạn (0-30)"
+        )
+        
+        lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
+        
+        # Close sidebar after search on mobile
+        if lookup_button:
+            st.session_state.sidebar_open = False
+            st.session_state.force_sidebar = False
+else:
+    # Create hidden inputs to maintain state
+    khoi_input = st.session_state.get('khoi_input', sorted(df['khoi'].unique())[0])
+    diem_input = st.session_state.get('diem_input', 21.0)
+    lookup_button = st.session_state.get('lookup_button', False)
+
+# Store input values in session state
+st.session_state.khoi_input = khoi_input
+st.session_state.diem_input = diem_input
 
 # Main content
 if lookup_button:
