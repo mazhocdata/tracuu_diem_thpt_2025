@@ -173,6 +173,15 @@ st.markdown("""
         background: white;
         border-radius: 10px;
         font-family: 'League Spartan', sans-serif;
+        color: #333 !important;
+    }
+    
+    .stSelectbox > div > div > div > div {
+        color: #333 !important;
+    }
+    
+    .stSelectbox label {
+        color: #333 !important;
     }
     
     .stNumberInput > div > div > input {
@@ -180,11 +189,16 @@ st.markdown("""
         border: 2px solid #e9ecef;
         transition: border-color 0.3s ease;
         font-family: 'League Spartan', sans-serif;
+        color: #333 !important;
     }
     
     .stNumberInput > div > div > input:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .stNumberInput label {
+        color: #333 !important;
     }
     
     /* Button Styles */
@@ -317,6 +331,23 @@ st.markdown("""
             min-width: 150px;
             font-size: 1rem;
             padding: 0 1rem;
+        }
+        
+        /* Mobile sidebar fixes */
+        .stSelectbox > div > div > div {
+            background: white !important;
+            color: #333 !important;
+            border: 1px solid #ddd;
+        }
+        
+        .stSelectbox label {
+            color: #333 !important;
+            font-weight: 600;
+        }
+        
+        .stNumberInput label {
+            color: #333 !important;
+            font-weight: 600;
         }
     }
 </style>
@@ -488,6 +519,10 @@ with st.sidebar:
 
 # Main content
 if lookup_button:
+    # Keep sidebar open on mobile after search
+    if st.session_state.get('mobile_searched', False):
+        st.sidebar.empty()
+    st.session_state['mobile_searched'] = True
     def format_region_result(df, diem_input, region):
         df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
         df_region = df_region.sort_values('diem_moc')
@@ -598,6 +633,8 @@ if lookup_button:
     st.markdown('</div>', unsafe_allow_html=True)
 
 else:
+    # Reset mobile search state when not searching
+    st.session_state['mobile_searched'] = False
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
