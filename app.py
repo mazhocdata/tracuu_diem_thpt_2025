@@ -130,10 +130,16 @@ st.markdown("""
     
     .region-header {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
         border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .region-title-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
     }
     
     .region-icon {
@@ -147,6 +153,14 @@ st.markdown("""
         font-weight: 700;
         color: #333 !important;
         margin: 0;
+    }
+    
+    .region-subtext {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-left: 2rem;
+        opacity: 0.8;
     }
     
     /* Sidebar Styles */
@@ -294,6 +308,11 @@ st.markdown("""
             margin-bottom: 1rem;
         }
         
+        .region-subtext {
+            margin-left: 0;
+            font-size: 0.8rem;
+        }
+        
         .stTabs [data-baseweb="tab"] {
             min-width: 150px;
             font-size: 1rem;
@@ -402,8 +421,14 @@ def create_region_histogram(df, khoi_input, region, diem_input):
     
     return fig
 
-# Simple icons using Unicode symbols
-def get_icon(icon_type):
+def get_region_subtext(region):
+    """Get descriptive subtext for each region"""
+    subtexts = {
+        'Cả nước': 'Toàn bộ các tỉnh thành trên cả nước',
+        'Miền Bắc': 'Các tỉnh thành từ Huế trở ra Bắc', 
+        'Miền Nam': 'Các tỉnh thành từ Đà Nẵng trở vô Nam'
+    }
+    return subtexts.get(region, '')
     icons = {
         "target": "🎯",
         "world": "🌍", 
@@ -433,7 +458,7 @@ st.markdown("""
 st.markdown(f"""
 <div class="main-header">
     <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
-    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc</p>
+    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -523,8 +548,11 @@ if lookup_button:
             st.markdown(f"""
             <div class="results-container fade-in">
                 <div class="region-header">
-                    <span class="region-icon">{icon}</span>
-                    <h2 class="region-title">{region}</h2>
+                    <div class="region-title-row">
+                        <span class="region-icon">{icon}</span>
+                        <h2 class="region-title">{region}</h2>
+                    </div>
+                    <div class="region-subtext">{get_region_subtext(region)}</div>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -563,7 +591,7 @@ else:
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
-        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi!</h2>
+        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
         <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
             Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
             để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
@@ -582,7 +610,7 @@ else:
 st.markdown("---")
 st.markdown(f"""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng bởi Hieu Nguyen</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ bằng Streamlit</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
