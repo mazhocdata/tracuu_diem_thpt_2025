@@ -413,6 +413,23 @@ st.markdown("""
             opacity: 1 !important;
             visibility: visible !important;
         }
+        
+        /* Mobile histogram optimizations */
+        .region-content-mobile {
+            flex-direction: column !important;
+        }
+        
+        .region-metrics-mobile {
+            margin-bottom: 1rem !important;
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 0.5rem !important;
+        }
+        
+        .region-chart-mobile {
+            width: 100% !important;
+            min-height: 300px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -638,7 +655,7 @@ st.markdown("""
 st.markdown(f"""
 <div class="main-header">
     <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
-    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc 2025</p>
+    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -762,32 +779,63 @@ if lookup_button:
                 </div>
             """, unsafe_allow_html=True)
             
-            # Metrics and histogram side by side
-            col_metrics, col_chart = st.columns([1, 2])
+            # Metrics and histogram - mobile optimized layout
+            # Check if mobile using custom detection
+            import streamlit as st
             
-            with col_metrics:
-                st.metric(
-                    "🏆 Xếp hạng top",
-                    f"{result['top_percent']:.2f}%",
-                    delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
-                )
+            # For mobile, stack vertically; for desktop, side by side
+            if st.session_state.get('mobile_view', False):
+                # Mobile: stacked layout
+                col_metrics = st.container()
+                col_chart = st.container()
                 
-                st.metric(
-                    "📊 Thứ hạng",
-                    f"{result['rank']:,}",
-                    delta=f"Trên tổng {result['total']:,} thí sinh"
-                )
+                with col_metrics:
+                    metric_cols = st.columns(3)
+                    with metric_cols[0]:
+                        st.metric(
+                            "🏆 Top %",
+                            f"{result['top_percent']:.2f}%"
+                        )
+                    with metric_cols[1]:
+                        st.metric(
+                            "📊 Thứ hạng",
+                            f"{result['rank']:,}"
+                        )
+                    with metric_cols[2]:
+                        st.metric(
+                            "📈 Phân vị", 
+                            f"{result['percentile']:.1f}"
+                        )
                 
-                st.metric(
-                    "📈 Phân vị", 
-                    f"{result['percentile']:.1f}",
-                    delta="percentile"
-                )
-            
-            with col_chart:
-                # Create and display histogram for this region using old data
-                fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
-                st.plotly_chart(fig_histogram, use_container_width=True)
+                with col_chart:
+                    fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
+                    st.plotly_chart(fig_histogram, use_container_width=True)
+            else:
+                # Desktop: side by side layout
+                col_metrics, col_chart = st.columns([1, 2])
+                
+                with col_metrics:
+                    st.metric(
+                        "🏆 Xếp hạng top",
+                        f"{result['top_percent']:.2f}%",
+                        delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
+                    )
+                    
+                    st.metric(
+                        "📊 Thứ hạng",
+                        f"{result['rank']:,}",
+                        delta=f"Trên tổng {result['total']:,} thí sinh"
+                    )
+                    
+                    st.metric(
+                        "📈 Phân vị", 
+                        f"{result['percentile']:.1f}",
+                        delta="percentile"
+                    )
+                
+                with col_chart:
+                    fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
+                    st.plotly_chart(fig_histogram, use_container_width=True)
             
             st.markdown("</div>", unsafe_allow_html=True)
     
@@ -797,7 +845,7 @@ else:
     # Welcome screen
     st.markdown(f"""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
-        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi THPT 2025!</h2>
+        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
         <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
             Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
             để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
