@@ -419,7 +419,13 @@ st.markdown("""
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("lookup_2025.csv")
+    """Load data for calculations (metrics, rankings)"""
+    return pd.read_csv("lookup_2025_18_7.csv")
+
+@st.cache_data
+def load_histogram_data():
+    """Load data specifically for histogram visualization"""
+    return pd.read_csv("lookup_2025_18_7_histogram.csv")
 
 def create_animated_metric_card(title, value, delta=None, icon="📊"):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
@@ -432,68 +438,119 @@ def create_animated_metric_card(title, value, delta=None, icon="📊"):
     </div>
     """
 
-def create_region_histogram(df, khoi_input, region, diem_input):
-    """Tạo histogram cho từng vùng miền với tooltip"""
-    df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
+def create_region_histogram(df_histogram, khoi_input, region, diem_input):
+    """Tạo histogram cho từng vùng miền với highlight cho điểm >= user score"""
+    df_region = df_histogram[(df_histogram['khoi'] == khoi_input) & (df_histogram['view'] == region)].copy()
     df_region = df_region.sort_values('diem_moc')
     
-    # Color mapping
-    color_map = {
+    # Color mapping for each region
+    region_colors = {
         'Cả nước': '#667eea',
         'Miền Bắc': '#f093fb', 
         'Miền Nam': '#4facfe'
     }
     
+    region_color = region_colors.get(region, '#667eea')
+    
+    # Create color array based on user score
+    colors = []
+    opacities = []
+    
+    for score in df_region['diem_moc']:
+        if score >= diem_input:
+            # Keep original region color for scores >= user score
+            colors.append(region_color)
+            opacities.append(0.8)
+        else:
+            # Light gray for scores < user score
+            colors.append('#d6d8db')  # Very light gray for scores < user score
+            opacities.append(0.4)
+    
     fig = go.Figure()
     
-    # Add histogram bars
+    # Add histogram bars with conditional coloring
     fig.add_trace(
         go.Bar(
             x=df_region['diem_moc'],
             y=df_region['count_exact'],
             name=f'Số thí sinh đạt điểm này',
-            marker_color=color_map.get(region, '#667eea'),
-            opacity=0.8,
+            marker=dict(
+                color=colors,
+                opacity=opacities,
+                line=dict(width=0.5, color='white')
+            ),
             hovertemplate=(
                 '<b>Điểm:</b> %{x}<br>' +
                 '<b>Số thí sinh:</b> %{y:,.0f}<br>' +
                 f'<b>Vùng:</b> {region}<br>' +
+                '<b>Trạng thái:</b> %{customdata}<br>' +
                 '<extra></extra>'
-            )
+            ),
+            customdata=[
+                'Cao hơn/bằng điểm của bạn' if score >= diem_input 
+                else 'Thấp hơn điểm của bạn' 
+                for score in df_region['diem_moc']
+            ]
         )
     )
     
-    # Add user point if exists
+    # Add user point with enhanced styling
     user_data = df_region[df_region['diem_moc'] == diem_input]
     if not user_data.empty:
         fig.add_trace(
             go.Scatter(
                 x=[diem_input],
                 y=[user_data['count_exact'].values[0]],
-                mode='markers',
+                mode='markers+text',
                 marker=dict(
-                    size=15, 
-                    color='red', 
+                    size=20, 
+                    color='#dc3545',  # Red for user point
                     symbol='star',
-                    line=dict(width=2, color='white')
+                    line=dict(width=3, color='white')
+                ),
+                text=['ĐIỂM CỦA BẠN'],
+                textposition='top center',
+                textfont=dict(
+                    size=12,
+                    color='#dc3545',
+                    family='League Spartan'
                 ),
                 name='Điểm của bạn',
                 hovertemplate=(
-                    '<b>Điểm của bạn:</b> %{x}<br>' +
-                    '<b>Số thí sinh cùng điểm:</b> %{y:,.0f}<br>' +
+                    '<b>🎯 Điểm của bạn:</b> %{x}<br>' +
+                    '<b>👥 Số thí sinh cùng điểm:</b> %{y:,.0f}<br>' +
                     '<extra></extra>'
                 )
             )
         )
     
+    # Add vertical line at user score for better visibility
+    fig.add_vline(
+        x=diem_input,
+        line_dash="dash",
+        line_color="#dc3545",
+        line_width=2,
+        opacity=0.7,
+        annotation_text=f"Điểm của bạn: {diem_input}",
+        annotation_position="top"
+    )
+    
+    # Calculate statistics for subtitle
+    total_students = df_region['count_exact'].sum()
+    students_below = df_region[df_region['diem_moc'] < diem_input]['count_exact'].sum()
+    percentage_above = ((total_students - students_below) / total_students * 100) if total_students > 0 else 0
+    
     fig.update_layout(
-        title=f"Phổ điểm thi - Khối {khoi_input} ({region})",
+        title=dict(
+            text=f"Phổ điểm thi - Khối {khoi_input} ({region})<br><sub style='font-size:12px; color:#666;'>🎨 Màu đậm: Điểm cao hơn/bằng bạn ({percentage_above:.1f}%) | ⚫ Màu nhạt: Điểm thấp hơn bạn ({100-percentage_above:.1f}%)</sub>",
+            font=dict(family="League Spartan", size=16)
+        ),
         xaxis_title="Tổng điểm",
         yaxis_title="Số thí sinh",
-        height=400,
+        height=450,
         showlegend=True,
         font=dict(family="League Spartan", size=12),
-        plot_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(248,249,250,0.8)',
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode='closest',
         legend=dict(
@@ -501,17 +558,32 @@ def create_region_histogram(df, khoi_input, region, diem_input):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(size=11)
+        ),
+        margin=dict(t=80, b=50, l=50, r=50),  # Reset bottom margin
+        xaxis=dict(
+            showspikes=True,
+            spikecolor="red",
+            spikethickness=1,
+            spikedash="dot"
         )
     )
     
     fig.update_xaxes(
-        gridcolor='lightgray',
-        title_font=dict(family="League Spartan", size=14)
+        gridcolor='rgba(128,128,128,0.2)',
+        title_font=dict(family="League Spartan", size=14),
+        showgrid=False,  # No grid lines
+        zeroline=False,
+        dtick=5,  # Major ticks every 5 points
+        tick0=0,     # Start ticks from 0
+        tickmode='linear'
     )
     fig.update_yaxes(
-        gridcolor='lightgray',
-        title_font=dict(family="League Spartan", size=14)
+        gridcolor='rgba(128,128,128,0.2)',
+        title_font=dict(family="League Spartan", size=14),
+        showgrid=False,  # No grid lines
+        zeroline=False
     )
     
     return fig
@@ -540,7 +612,8 @@ def get_icon(icon_type):
     return icons.get(icon_type, "📊")
 
 # Load data
-df = load_data()
+df = load_data()  # For calculations
+df_histogram = load_histogram_data()  # For histogram visualization
 
 # Mobile sidebar solution using session state
 if 'sidebar_open' not in st.session_state:
@@ -712,8 +785,8 @@ if lookup_button:
                 )
             
             with col_chart:
-                # Create and display histogram for this region
-                fig_histogram = create_region_histogram(df, khoi_input, region, diem_input)
+                # Create and display histogram for this region using old data
+                fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
                 st.plotly_chart(fig_histogram, use_container_width=True)
             
             st.markdown("</div>", unsafe_allow_html=True)
@@ -741,7 +814,7 @@ else:
 
 # Footer
 st.markdown("---")
-st.markdown(f"""
+st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
     <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ bằng Streamlit</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
