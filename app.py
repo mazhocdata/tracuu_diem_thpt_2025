@@ -238,6 +238,16 @@ st.markdown("""
         color: #333 !important;
     }
     
+    /* Hide number input +/- buttons */
+    .stNumberInput > div > div > button {
+        display: none !important;
+    }
+    
+    .stNumberInput button[data-testid="stNumberInputStepUp"],
+    .stNumberInput button[data-testid="stNumberInputStepDown"] {
+        display: none !important;
+    }
+    
     /* Button Styles */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -907,10 +917,8 @@ if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False)
         </div>
         """, unsafe_allow_html=True)
         
-        # Close sidebar after search on mobile
-        if lookup_button:
-            st.session_state.sidebar_open = False
-            st.session_state.force_sidebar = False
+        # DON'T close sidebar after search - keep it open for multiple searches
+        # This fixes the bug where users can't change inputs after first search
 else:
     # Create hidden inputs to maintain state
     khoi_input = st.session_state.get('khoi_input', sorted(df['khoi'].unique())[0])
@@ -1090,7 +1098,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ bằng Streamlit</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ Hieu Nguyen</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
