@@ -528,7 +528,7 @@ def create_region_histogram(df_histogram, khoi_input, region, diem_input):
                 text=['ĐIỂM CỦA BẠN'],
                 textposition='top center',
                 textfont=dict(
-                    size=12,
+                    size=10,  # Smaller text for mobile
                     color='#dc3545',
                     family='League Spartan'
                 ),
@@ -548,8 +548,9 @@ def create_region_histogram(df_histogram, khoi_input, region, diem_input):
         line_color="#dc3545",
         line_width=2,
         opacity=0.7,
-        annotation_text=f"Điểm của bạn: {diem_input}",
-        annotation_position="top"
+        annotation_text=f"Điểm: {diem_input}",  # Shorter annotation for mobile
+        annotation_position="top",
+        annotation_font_size=10
     )
     
     # Calculate statistics for subtitle
@@ -557,28 +558,21 @@ def create_region_histogram(df_histogram, khoi_input, region, diem_input):
     students_below = df_region[df_region['diem_moc'] < diem_input]['count_exact'].sum()
     percentage_above = ((total_students - students_below) / total_students * 100) if total_students > 0 else 0
     
+    # Mobile-optimized layout
     fig.update_layout(
         title=dict(
-            text=f"Phổ điểm thi - Khối {khoi_input} ({region})<br><sub style='font-size:12px; color:#666;'>🎨 Màu đậm: Điểm cao hơn/bằng bạn ({percentage_above:.1f}%) | ⚫ Màu nhạt: Điểm thấp hơn bạn ({100-percentage_above:.1f}%)</sub>",
-            font=dict(family="League Spartan", size=16)
+            text=f"Phổ điểm thi - Khối {khoi_input} ({region})",  # Removed subtitle
+            font=dict(family="League Spartan", size=14)  # Smaller title for mobile
         ),
         xaxis_title="Tổng điểm",
         yaxis_title="Số thí sinh",
-        height=450,
-        showlegend=True,
-        font=dict(family="League Spartan", size=12),
-        plot_bgcolor='rgba(248,249,250,0.8)',
+        height=350,  # Reduced height for mobile
+        showlegend=False,  # Hide legend on mobile for cleaner look
+        font=dict(family="League Spartan", size=10),  # Smaller font
+        plot_bgcolor='white',
         paper_bgcolor='rgba(0,0,0,0)',
         hovermode='closest',
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font=dict(size=11)
-        ),
-        margin=dict(t=80, b=50, l=50, r=50),  # Reset bottom margin
+        margin=dict(t=60, b=40, l=40, r=20),  # Optimized margins for mobile
         xaxis=dict(
             showspikes=True,
             spikecolor="red",
@@ -589,21 +583,193 @@ def create_region_histogram(df_histogram, khoi_input, region, diem_input):
     
     fig.update_xaxes(
         gridcolor='rgba(128,128,128,0.2)',
-        title_font=dict(family="League Spartan", size=14),
-        showgrid=False,  # No grid lines
+        title_font=dict(family="League Spartan", size=12),
+        showgrid=False,
         zeroline=False,
-        dtick=5,  # Major ticks every 5 points
-        tick0=0,     # Start ticks from 0
+        dtick=5,
+        tick0=0,
         tickmode='linear'
     )
     fig.update_yaxes(
         gridcolor='rgba(128,128,128,0.2)',
-        title_font=dict(family="League Spartan", size=14),
-        showgrid=False,  # No grid lines
+        title_font=dict(family="League Spartan", size=12),
+        showgrid=False,
         zeroline=False
     )
     
     return fig
+
+def create_score_breakdown_table(df, khoi_input, region):
+    """Tạo bảng thống kê phân bổ điểm theo các mốc quan trọng"""
+    df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
+    df_region = df_region.sort_values('diem_moc', ascending=False)
+    total = df_region['count_exact'].sum()
+    
+    # Định nghĩa các mốc điểm chi tiết
+    score_thresholds = [29.0, 28.0, 27.0, 26.0, 25.0, 24.0, 23.0, 22.0, 21.0, 20.0, 19.0, 18.0, 17.0]
+    
+    breakdown_data = []
+    
+    # Xử lý các mốc >= 17
+    for threshold in score_thresholds:
+        label = f"{int(threshold)}+"
+        
+        # Tìm row có điểm chính xác bằng threshold
+        exact_row = df_region[df_region['diem_moc'] == threshold]
+        
+        if not exact_row.empty:
+            # Sử dụng data có sẵn từ file
+            student_count = exact_row['count_greater_equal'].values[0]
+            percentage = exact_row['top_percent'].values[0]
+        else:
+            # Nếu không có điểm chính xác, tìm điểm gần nhất >= threshold
+            filtered_df = df_region[df_region['diem_moc'] >= threshold]
+            if not filtered_df.empty:
+                closest_row = filtered_df.iloc[-1]  # Lấy điểm nhỏ nhất >= threshold
+                student_count = closest_row['count_greater_equal']
+                percentage = closest_row['top_percent']
+            else:
+                student_count = 0
+                percentage = 0.0
+        
+        breakdown_data.append({
+            'Tổng điểm': label,
+            'Số thí sinh': f"{student_count:,}",
+            'Thứ hạng theo %': f"{percentage:.1f}%"
+        })
+    
+    # Xử lý mốc <17
+    filtered_df_below_17 = df_region[df_region['diem_moc'] < 17.0]
+    student_count_below_17 = filtered_df_below_17['count_exact'].sum()
+    percentage_below_17 = (student_count_below_17 / total * 100) if total > 0 else 0
+    
+    breakdown_data.append({
+        'Tổng điểm': '<17',
+        'Số thí sinh': f"{student_count_below_17:,}",
+        'Thứ hạng theo %': f"{percentage_below_17:.1f}%"
+    })
+    
+    # Thêm dòng Total
+    breakdown_data.append({
+        'Tổng điểm': 'Total',
+        'Số thí sinh': f"{total:,}",
+        'Thứ hạng theo %': '100.0%'
+    })
+    
+    return pd.DataFrame(breakdown_data)
+
+def display_score_breakdown_section(df, khoi_input, region, diem_input, user_result):
+    """Hiển thị section thống kê phân bổ điểm"""
+    
+    st.markdown(f"""
+    <div style="margin-top: 2rem;">
+        <h4 style="color: #333; margin-bottom: 1rem;">📊 Bảng so sánh chi tiết các mốc điểm:</h4>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Chỉ hiển thị note cho vùng "Cả nước" với data thực tế của user
+    if region == "Cả nước" and user_result:
+        # Tính toán dynamic values
+        user_score = diem_input
+        user_rank = user_result['rank']
+        
+        # Lấy số thí sinh ở mốc điểm của user
+        df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
+        user_score_int = int(user_score) if user_score == int(user_score) else user_score
+        
+        # Tìm mốc điểm tương ứng trong bảng
+        exact_row = df_region[df_region['diem_moc'] == user_score]
+        if not exact_row.empty:
+            students_at_threshold = exact_row['count_greater_equal'].values[0]
+        else:
+            # Tìm mốc gần nhất
+            threshold = int(user_score) if user_score >= int(user_score) else int(user_score) + 1
+            threshold_row = df_region[df_region['diem_moc'] == threshold]
+            students_at_threshold = threshold_row['count_greater_equal'].values[0] if not threshold_row.empty else 0
+        
+        # Tính số thí sinh cùng điểm
+        students_same_score = students_at_threshold - user_rank + 1
+        
+        st.markdown(f"""
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; border-left: 4px solid #17a2b8; margin-bottom: 1rem;">
+            <p style="color: #666; font-size: 0.9rem; margin: 0;">
+                <strong>💡 Lưu ý:</strong><br>
+                • <strong>Thứ hạng trên metrics</strong>: Vị trí cụ thể của bạn trong danh sách xếp hạng<br>
+                • <strong>Số thí sinh trong bảng</strong>: Tổng số thí sinh đạt mốc điểm đó trở lên (≥)<br>
+                • <strong>Ví dụ với điểm của bạn</strong>: Bạn có thứ hạng {user_rank:,} và mốc {user_score_int}+ có {students_at_threshold:,} thí sinh, 
+                nghĩa là có {students_same_score:,} thí sinh cùng điểm {user_score} với bạn
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Tạo bảng breakdown
+    breakdown_df = create_score_breakdown_table(df, khoi_input, region)
+    
+    # Custom styling cho bảng với dòng Total được highlight
+    def highlight_total_row(row):
+        if row['Tổng điểm'] == 'Total':
+            return ['background-color: #667eea; color: white; font-weight: bold; border: 1px solid #5a6fd8; padding: 10px; text-align: center; font-family: League Spartan;'] * len(row)
+        else:
+            return ['background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 8px; text-align: center; font-family: League Spartan;'] * len(row)
+    
+    styled_df = breakdown_df.style.apply(highlight_total_row, axis=1).set_table_styles([
+        {
+            'selector': 'thead th',
+            'props': [
+                ('background-color', '#667eea'),
+                ('color', 'white'),
+                ('font-weight', 'bold'),
+                ('text-align', 'center'),
+                ('padding', '12px'),
+                ('font-family', 'League Spartan'),
+                ('border', '1px solid #5a6fd8')
+            ]
+        },
+        {
+            'selector': 'table',
+            'props': [
+                ('border-collapse', 'collapse'),
+                ('margin', '0 auto'),
+                ('border-radius', '8px'),
+                ('overflow', 'hidden'),
+                ('box-shadow', '0 4px 6px rgba(0, 0, 0, 0.1)'),
+                ('width', '100%')
+            ]
+        }
+    ]).hide(axis="index")
+    
+    # Hiển thị bảng
+    st.dataframe(
+        styled_df,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Tổng điểm": st.column_config.TextColumn(
+                "Tổng điểm",
+                width="medium",
+            ),
+            "Số thí sinh": st.column_config.TextColumn(
+                "Số thí sinh",
+                width="medium",
+            ),
+            "Thứ hạng theo %": st.column_config.TextColumn(
+                "Thứ hạng theo %",
+                width="medium",
+            )
+        }
+    )
+    
+    # Chỉ hiển thị note cuối cho vùng "Cả nước" với điểm thực tế của user
+    if region == "Cả nước":
+        user_score_int = int(diem_input) if diem_input == int(diem_input) else int(diem_input)
+        st.markdown(f"""
+        <div style="margin-top: 1rem; padding: 0.8rem; background: #e8f4f8; border-radius: 6px; border-left: 3px solid #17a2b8;">
+            <p style="color: #31708f; font-size: 0.85rem; margin: 0; font-style: italic;">
+                <strong>🔍 Cách đọc bảng:</strong> Mốc "{user_score_int}+" có nghĩa là số thí sinh đạt từ {user_score_int}.0 điểm trở lên. 
+                Nếu bạn có {diem_input} điểm, bạn sẽ nằm trong nhóm này cùng với những người có điểm cao hơn.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 def get_region_subtext(region):
     """Get descriptive subtext for each region"""
@@ -683,6 +849,63 @@ if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False)
         )
         
         lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
+        
+        # Thông tin bổ sung
+        st.markdown("---")
+        
+        # Tips section
+        st.markdown("### 💡 Gợi ý")
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                    padding: 1rem; border-radius: 10px; margin: 0.5rem 0;">
+            <p style="margin: 0; font-size: 0.85rem; color: #495057;">
+                <strong>🎯 Điểm cao:</strong> ≥ 24 điểm<br>
+                <strong>📈 Điểm khá:</strong> 18-24 điểm<br>
+                <strong>⚖️ Điểm trung bình:</strong> < 18 điểm
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Help section
+        st.markdown("### ❓ Trợ giúp")
+        with st.expander("📖 Cách sử dụng"):
+            st.markdown("""
+            1. **Chọn khối thi** của bạn
+            2. **Nhập điểm tổng** (3 môn cộng lại)
+            3. **Nhấn tra cứu** để xem kết quả
+            4. **Xem biểu đồ** và bảng thống kê chi tiết
+            """)
+        
+        with st.expander("🤔 Câu hỏi thường gặp"):
+            st.markdown("""
+            **Q: Điểm tôi nhập có chính xác không?**  
+            A: Đảm bảo cộng đúng tổng 3 môn thi
+            
+            **Q: Thứ hạng có ý nghĩa gì?**  
+            A: Vị trí của bạn so với tất cả thí sinh cùng khối
+            
+            **Q: Dữ liệu từ nguồn nào?**  
+            A: Từ kết quả thi chính thức năm 2025
+            """)
+        
+        # Contact info
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; padding: 0.5rem;">
+            <p style="margin: 0; font-size: 0.8rem; color: #6c757d;">
+                💬 Cần hỗ trợ? Liên hệ qua<br>
+                <a href="https://www.facebook.com/madzyandlucas" target="_blank" 
+                   style="color: #667eea; text-decoration: none;">
+                   Facebook
+                </a> 
+                hoặc 
+                <a href="https://madzynguyen.com" target="_blank" 
+                   style="color: #667eea; text-decoration: none;">
+                   Website
+                </a>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
         
         # Close sidebar after search on mobile
         if lookup_button:
@@ -837,6 +1060,9 @@ if lookup_button:
                     fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
                     st.plotly_chart(fig_histogram, use_container_width=True)
             
+            # Thêm bảng thống kê phân bổ điểm với parameters đầy đủ
+            display_score_breakdown_section(df, khoi_input, region, diem_input, result)
+            
             st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
@@ -864,7 +1090,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | @copyright by HieuNguyen</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng bởi HieuNguyen</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
