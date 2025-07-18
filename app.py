@@ -163,48 +163,6 @@ st.markdown("""
         opacity: 0.8;
     }
     
-    /* Sidebar Styles */
-    .sidebar .sidebar-content {
-        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-    
-    /* Mobile toggle button */
-    .stButton[data-testid="baseButton-secondary"] {
-        position: fixed !important;
-        top: 1rem !important;
-        left: 1rem !important;
-        z-index: 999999 !important;
-        background: #667eea !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 50% !important;
-        width: 3rem !important;
-        height: 3rem !important;
-        min-height: 3rem !important;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
-        display: none !important;
-    }
-    
-    .stButton[data-testid="baseButton-secondary"] > button {
-        background: transparent !important;
-        border: none !important;
-        color: white !important;
-        font-size: 1.2rem !important;
-        width: 100% !important;
-        height: 100% !important;
-        border-radius: 50% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    
-    /* Ensure sidebar toggle is always visible */
-    [data-testid="collapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-    
     /* Input Styles */
     .stSelectbox > div > div > div {
         background: white;
@@ -243,11 +201,6 @@ st.markdown("""
         display: none !important;
     }
     
-    .stNumberInput button[data-testid="stNumberInputStepUp"],
-    .stNumberInput button[data-testid="stNumberInputStepDown"] {
-        display: none !important;
-    }
-    
     /* Button Styles */
     .stButton > button {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -267,44 +220,6 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
     }
     
-    /* Tab Styles - Increased width */
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        justify-content: center;
-    }
-    
-    .stTabs [data-baseweb="tab"] {
-        height: 60px;
-        min-width: 200px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border-radius: 15px 15px 0 0;
-        font-weight: 600;
-        font-family: 'League Spartan', sans-serif;
-        font-size: 1.1rem;
-        padding: 0 2rem;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    /* Icons */
-    .icon {
-        display: inline-block;
-        width: 1.2em;
-        height: 1.2em;
-        margin-right: 0.5rem;
-    }
-    
-    .icon-white {
-        filter: brightness(0) invert(1);
-    }
-    
-    .icon-dark {
-        filter: brightness(0);
-    }
-    
     /* Animation */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
@@ -315,7 +230,7 @@ st.markdown("""
         animation: fadeIn 0.6s ease-out;
     }
     
-    /* Hide GitHub and menu buttons */
+    /* Hide Streamlit elements */
     [data-testid="stToolbar"] {
         display: none !important;
     }
@@ -328,12 +243,10 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Hide hamburger menu */
     [data-testid="stSidebarNav"] {
         display: none !important;
     }
     
-    /* Hide "Made with Streamlit" footer */
     footer {
         display: none !important;
     }
@@ -373,73 +286,6 @@ st.markdown("""
             margin-left: 0;
             font-size: 0.8rem;
         }
-        
-        .stTabs [data-baseweb="tab"] {
-            min-width: 150px;
-            font-size: 1rem;
-            padding: 0 1rem;
-        }
-        
-        /* Mobile sidebar fixes */
-        .stSelectbox > div > div > div {
-            background: white !important;
-            color: #333 !important;
-            border: 1px solid #ddd;
-        }
-        
-        .stSelectbox label {
-            color: #333 !important;
-            font-weight: 600;
-        }
-        
-        .stNumberInput label {
-            color: #333 !important;
-            font-weight: 600;
-        }
-        
-        /* Show mobile toggle button on mobile */
-        .stButton[data-testid="baseButton-secondary"] {
-            display: flex !important;
-        }
-        
-        /* Force sidebar toggle button visibility on mobile */
-        .custom-sidebar-toggle {
-            display: flex !important;
-        }
-        
-        [data-testid="collapsedControl"] {
-            display: block !important;
-            position: fixed !important;
-            top: 1rem !important;
-            left: 1rem !important;
-            z-index: 999999 !important;
-            background: #667eea !important;
-            color: white !important;
-            border-radius: 50% !important;
-            width: 3rem !important;
-            height: 3rem !important;
-            border: none !important;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-        
-        /* Mobile histogram optimizations */
-        .region-content-mobile {
-            flex-direction: column !important;
-        }
-        
-        .region-metrics-mobile {
-            margin-bottom: 1rem !important;
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            gap: 0.5rem !important;
-        }
-        
-        .region-chart-mobile {
-            width: 100% !important;
-            min-height: 300px !important;
-        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -454,6 +300,11 @@ def load_histogram_data():
     """Load data specifically for histogram visualization"""
     return pd.read_csv("lookup_2025_18_7_histogram.csv")
 
+@st.cache_data
+def load_top_2024_data():
+    """Load data for 2024 top percentage thresholds"""
+    return pd.read_csv("lookup_2025_18_7_top_2024.csv")
+
 def create_animated_metric_card(title, value, delta=None, icon="📊"):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
     
@@ -464,6 +315,33 @@ def create_animated_metric_card(title, value, delta=None, icon="📊"):
         {delta_html}
     </div>
     """
+
+def get_2024_top_percentage(df_2024, khoi_input, region, diem_input):
+    """Tìm top % tương ứng với điểm user nếu thi năm 2024"""
+    # Filter data cho view và khối
+    df_region_2024 = df_2024[df_2024['View'] == region].copy()
+    
+    if khoi_input not in df_region_2024.columns:
+        return None
+    
+    # Sắp xếp theo Top % tăng dần
+    df_region_2024 = df_region_2024.sort_values('Top %')
+    
+    # Tìm top % mà user đạt được (điểm user >= điểm ngưỡng)
+    eligible_rows = df_region_2024[df_region_2024[khoi_input] <= diem_input]
+    
+    if eligible_rows.empty:
+        # Điểm quá thấp, không lọt top nào
+        return {"top_percent": ">100", "threshold_score": None}
+    
+    # Lấy top % tốt nhất (nhỏ nhất) mà user đạt được
+    best_top_percent = eligible_rows['Top %'].iloc[0]
+    threshold_score = eligible_rows[khoi_input].iloc[0]
+    
+    return {
+        "top_percent": f"{best_top_percent}%",
+        "threshold_score": threshold_score
+    }
 
 def create_region_histogram(df_histogram, khoi_input, region, diem_input):
     """Tạo histogram cho từng vùng miền với highlight cho điểm >= user score"""
@@ -562,11 +440,6 @@ def create_region_histogram(df_histogram, khoi_input, region, diem_input):
         annotation_position="top",
         annotation_font_size=10
     )
-    
-    # Calculate statistics for subtitle
-    total_students = df_region['count_exact'].sum()
-    students_below = df_region[df_region['diem_moc'] < diem_input]['count_exact'].sum()
-    percentage_above = ((total_students - students_below) / total_students * 100) if total_students > 0 else 0
     
     # Mobile-optimized layout
     fig.update_layout(
@@ -671,7 +544,7 @@ def create_score_breakdown_table(df, khoi_input, region):
 def display_score_breakdown_section(df, khoi_input, region, diem_input, user_result):
     """Hiển thị section thống kê phân bổ điểm"""
     
-    st.markdown(f"""
+    st.markdown("""
     <div style="margin-top: 2rem;">
         <h4 style="color: #333; margin-bottom: 1rem;">📊 Bảng so sánh chi tiết các mốc điểm:</h4>
     </div>
@@ -790,23 +663,10 @@ def get_region_subtext(region):
     }
     return subtexts.get(region, '')
 
-def get_icon(icon_type):
-    icons = {
-        "target": "🎯",
-        "world": "🌍", 
-        "mountain": "⛰️",
-        "beach": "🏖️",
-        "rank": "📊",
-        "trophy": "🏆",
-        "percentage": "📈",
-        "book": "📚",
-        "search": "🔍"
-    }
-    return icons.get(icon_type, "📊")
-
 # Load data
 df = load_data()  # For calculations
 df_histogram = load_histogram_data()  # For histogram visualization
+df_2024 = load_top_2024_data()  # For 2024 comparison
 
 # Mobile sidebar solution using session state
 if 'sidebar_open' not in st.session_state:
@@ -828,7 +688,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Header
-st.markdown(f"""
+st.markdown("""
 <div class="main-header">
     <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
     <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
@@ -838,7 +698,7 @@ st.markdown(f"""
 # Sidebar (conditional display for mobile)
 if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False):
     with st.sidebar:
-        st.markdown(f"### 📚 Thiết lập tra cứu")
+        st.markdown("### 📚 Thiết lập tra cứu")
         
         st.markdown("---")
         
@@ -995,6 +855,60 @@ if lookup_button:
             icon="🎯"
         ), unsafe_allow_html=True)
     
+    # 2024 Comparison Section
+    st.markdown("### 📅 So sánh với năm 2024")
+    st.markdown("""
+    <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #ffc107;">
+        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+            <strong>💡 Thông tin:</strong> Nếu điểm số này thi vào năm 2024, bạn sẽ đạt top % như sau:
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1_2024, col2_2024, col3_2024 = st.columns(3)
+    
+    for i, (region, icon) in enumerate(zip(regions, region_icons)):
+        comparison_2024 = get_2024_top_percentage(df_2024, khoi_input, region, diem_input)
+        
+        with [col1_2024, col2_2024, col3_2024][i]:
+            if comparison_2024:
+                if comparison_2024["top_percent"] == ">100":
+                    st.markdown(create_animated_metric_card(
+                        f"2024 - {region}",
+                        "Ngoài top 100%",
+                        delta="Điểm chưa đủ",
+                        icon="📉"
+                    ), unsafe_allow_html=True)
+                else:
+                    # So sánh với kết quả 2025
+                    current_result = results[region]
+                    if current_result:
+                        current_top = current_result['top_percent']
+                        comparison_2024_num = float(comparison_2024["top_percent"].replace('%', ''))
+                        
+                        if comparison_2024_num < current_top:
+                            trend = f"Tốt hơn {current_top - comparison_2024_num:.1f}%"
+                            trend_color = "#28a745"
+                        elif comparison_2024_num > current_top:
+                            trend = f"Kém hơn {comparison_2024_num - current_top:.1f}%"
+                            trend_color = "#dc3545"
+                        else:
+                            trend = "Tương đương"
+                            trend_color = "#ffc107"
+                    else:
+                        trend = ""
+                        trend_color = "#666"
+                    
+                    st.markdown(f"""
+                    <div class="metric-card fade-in">
+                        <div class="metric-title">{icon} 2024 - {region}</div>
+                        <div class="metric-value">Top {comparison_2024["top_percent"]}</div>
+                        <div class="metric-delta" style="color: {trend_color};">
+                            {trend}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+    
     # Detailed results for each region with histogram
     for region, icon in zip(regions, region_icons):
         result = results[region]
@@ -1010,63 +924,31 @@ if lookup_button:
                 </div>
             """, unsafe_allow_html=True)
             
-            # Metrics and histogram - mobile optimized layout
-            # Check if mobile using custom detection
-            import streamlit as st
+            # Desktop: side by side layout
+            col_metrics, col_chart = st.columns([1, 2])
             
-            # For mobile, stack vertically; for desktop, side by side
-            if st.session_state.get('mobile_view', False):
-                # Mobile: stacked layout
-                col_metrics = st.container()
-                col_chart = st.container()
+            with col_metrics:
+                st.metric(
+                    "🏆 Xếp hạng top",
+                    f"{result['top_percent']:.2f}%",
+                    delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
+                )
                 
-                with col_metrics:
-                    metric_cols = st.columns(3)
-                    with metric_cols[0]:
-                        st.metric(
-                            "🏆 Top %",
-                            f"{result['top_percent']:.2f}%"
-                        )
-                    with metric_cols[1]:
-                        st.metric(
-                            "📊 Thứ hạng",
-                            f"{result['rank']:,}"
-                        )
-                    with metric_cols[2]:
-                        st.metric(
-                            "📈 Phân vị", 
-                            f"{result['percentile']:.1f}"
-                        )
+                st.metric(
+                    "📊 Thứ hạng",
+                    f"{result['rank']:,}",
+                    delta=f"Trên tổng {result['total']:,} thí sinh"
+                )
                 
-                with col_chart:
-                    fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
-                    st.plotly_chart(fig_histogram, use_container_width=True)
-            else:
-                # Desktop: side by side layout
-                col_metrics, col_chart = st.columns([1, 2])
-                
-                with col_metrics:
-                    st.metric(
-                        "🏆 Xếp hạng top",
-                        f"{result['top_percent']:.2f}%",
-                        delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
-                    )
-                    
-                    st.metric(
-                        "📊 Thứ hạng",
-                        f"{result['rank']:,}",
-                        delta=f"Trên tổng {result['total']:,} thí sinh"
-                    )
-                    
-                    st.metric(
-                        "📈 Phân vị", 
-                        f"{result['percentile']:.1f}",
-                        delta="percentile"
-                    )
-                
-                with col_chart:
-                    fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
-                    st.plotly_chart(fig_histogram, use_container_width=True)
+                st.metric(
+                    "📈 Phân vị", 
+                    f"{result['percentile']:.1f}",
+                    delta="percentile"
+                )
+            
+            with col_chart:
+                fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
+                st.plotly_chart(fig_histogram, use_container_width=True)
             
             # Thêm bảng thống kê phân bổ điểm với parameters đầy đủ
             display_score_breakdown_section(df, khoi_input, region, diem_input, result)
@@ -1077,7 +959,7 @@ if lookup_button:
 
 else:
     # Welcome screen
-    st.markdown(f"""
+    st.markdown("""
     <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
         <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
         <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
@@ -1098,7 +980,7 @@ else:
 st.markdown("---")
 st.markdown("""
 <div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ Hieu Nguyen</p>
+    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ HieuNguyen</p>
     <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
 </div>
 """, unsafe_allow_html=True)
