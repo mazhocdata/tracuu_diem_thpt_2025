@@ -1195,7 +1195,7 @@ def main():
             <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
             <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
                 Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
-                để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
+                để khám phá vị trí của mình trong bảng xếp hạng.
             </p>
             <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
                 <div style="text-align: center;">
