@@ -7,8 +7,8 @@ import numpy as np
 
 # Page config
 st.set_page_config(
-    page_title="Tra cứu điểm thi 2025",
-    page_icon="🎯",
+    page_title="Phân tích điểm thi thpt 2025",
+    page_icon="🍀",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -955,8 +955,8 @@ def main():
     
     st.markdown("""
     <div class="main-header">
-        <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
-        <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
+        <h1 class="main-title">🎯 Tra cứu & phân tích thứ hạng điểm thi 2025</h1>
+        <p class="main-subtitle">Phân tích vị trí của bạn trong bảng xếp hạng toàn quốc</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1007,7 +1007,7 @@ def main():
         st.markdown("""
         <div style="background: #e3f2fd; padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #2196f3;">
             <p style="margin: 0; color: #1565c0; font-size: 0.9rem;">
-                <strong>💡 Thông tin:</strong> Bảng dưới đây cho thấy điểm tương đương ở các khối khác để đạt top % tương tự như điểm của bạn.
+                <strong>💡 Thông tin:</strong> Bảng dưới đây cho thấy điểm tương đương ở các khối khác để đạt top % (gần) tương tự như điểm của bạn.
             </p>
         </div>
         """, unsafe_allow_html=True)
