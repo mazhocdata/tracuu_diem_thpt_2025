@@ -24,6 +24,30 @@ st.markdown("""
         font-family: 'League Spartan', sans-serif;
     }
     
+    /* Mobile Toggle Button */
+    .mobile-toggle {
+        position: fixed;
+        top: 70px;
+        left: 10px;
+        z-index: 1000;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+        display: none; /* Ẩn trên desktop */
+    }
+    
+    .mobile-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    
     /* Info Header Styles */
     .info-header {
         padding: 0.8rem 0;
@@ -255,8 +279,12 @@ st.markdown("""
         display: none !important;
     }
     
-    /* Responsive */
+    /* Mobile Responsive */
     @media (max-width: 768px) {
+        .mobile-toggle {
+            display: block !important;
+        }
+        
         .main-title {
             font-size: 2rem;
         }
@@ -286,9 +314,195 @@ st.markdown("""
             margin-left: 0;
             font-size: 0.8rem;
         }
+        
+        /* Mobile sidebar overlay */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
+
+# =============================================================================
+# MOBILE SIDEBAR HANDLING - PHIÊN BẢN CẢI TIẾN
+# =============================================================================
+
+def initialize_session_state():
+    """Khởi tạo session state một cách clean và đơn giản"""
+    if 'sidebar_open' not in st.session_state:
+        st.session_state.sidebar_open = True
+    
+    # Khởi tạo default values cho inputs
+    if 'khoi_input' not in st.session_state:
+        st.session_state.khoi_input = None
+    if 'diem_input' not in st.session_state:
+        st.session_state.diem_input = 21.0
+    if 'lookup_triggered' not in st.session_state:
+        st.session_state.lookup_triggered = False
+    if 'is_mobile' not in st.session_state:
+        st.session_state.is_mobile = False
+
+def create_mobile_toggle_button():
+    """Tạo nút toggle cho mobile một cách đơn giản"""
+    # Toggle button cho mobile
+    col_toggle, col_spacer = st.columns([1, 20])
+    with col_toggle:
+        if st.button("☰", key="mobile_toggle", help="Mở/đóng menu"):
+            st.session_state.sidebar_open = not st.session_state.sidebar_open
+            st.rerun()
+
+def create_sidebar_additional_content():
+    """Tạo nội dung bổ sung cho sidebar"""
+    st.markdown("---")
+    
+    # Tips section
+    st.markdown("### 💡 Gợi ý")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
+                padding: 1rem; border-radius: 10px; margin: 0.5rem 0;">
+        <p style="margin: 0; font-size: 0.85rem; color: #495057;">
+            <strong>🎯 Điểm cao:</strong> ≥ 24 điểm<br>
+            <strong>📈 Điểm khá:</strong> 18-24 điểm<br>
+            <strong>⚖️ Điểm trung bình:</strong> < 18 điểm
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Help section
+    st.markdown("### ❓ Trợ giúp")
+    with st.expander("📖 Cách sử dụng"):
+        st.markdown("""
+        1. **Chọn khối thi** của bạn
+        2. **Nhập điểm tổng** (3 môn cộng lại)
+        3. **Nhấn tra cứu** để xem kết quả
+        4. **Xem biểu đồ** và bảng thống kê chi tiết
+        """)
+    
+    with st.expander("🤔 Câu hỏi thường gặp"):
+        st.markdown("""
+        **Q: Điểm tôi nhập có chính xác không?**  
+        A: Đảm bảo cộng đúng tổng 3 môn thi
+        
+        **Q: Thứ hạng có ý nghĩa gì?**  
+        A: Vị trí của bạn so với tất cả thí sinh cùng khối
+        
+        **Q: Dữ liệu từ nguồn nào?**  
+        A: Từ kết quả thi chính thức năm 2025
+        """)
+    
+    # Contact info
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; padding: 0.5rem;">
+        <p style="margin: 0; font-size: 0.8rem; color: #6c757d;">
+            💬 Cần hỗ trợ? Liên hệ qua<br>
+            <a href="https://www.facebook.com/madzyandlucas" target="_blank" 
+               style="color: #667eea; text-decoration: none;">
+               Facebook
+            </a> 
+            hoặc 
+            <a href="https://madzynguyen.com" target="_blank" 
+               style="color: #667eea; text-decoration: none;">
+               Website
+            </a>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+def create_sidebar_content():
+    """Tạo nội dung sidebar - tách riêng để dễ maintain"""
+    # Close button cho mobile
+    col_close, col_spacer = st.columns([1, 4])
+    with col_close:
+        if st.button("✕", key="close_sidebar", help="Đóng menu"):
+            st.session_state.sidebar_open = False
+            st.rerun()
+    
+    st.markdown("### 📚 Thiết lập tra cứu")
+    st.markdown("---")
+    
+    # Load data để lấy danh sách khối
+    df = load_data()
+    
+    # Khối thi selection
+    khoi_options = sorted(df['khoi'].unique())
+    if st.session_state.khoi_input is None:
+        default_khoi_index = 0
+    else:
+        try:
+            default_khoi_index = khoi_options.index(st.session_state.khoi_input)
+        except ValueError:
+            default_khoi_index = 0
+    
+    khoi_input = st.selectbox(
+        "📚 Chọn khối thi",
+        khoi_options,
+        index=default_khoi_index,
+        help="Chọn khối thi bạn muốn tra cứu",
+        key="khoi_selectbox"
+    )
+    
+    # Điểm input
+    diem_input = st.number_input(
+        "🎯 Nhập tổng điểm",
+        min_value=0.0,
+        max_value=30.0,
+        value=st.session_state.diem_input,
+        step=0.05,
+        help="Nhập tổng điểm của bạn (0-30)",
+        key="diem_number_input"
+    )
+    
+    # Lookup button
+    lookup_button = st.button(
+        "🔍 Tra cứu ngay", 
+        use_container_width=True,
+        key="lookup_button"
+    )
+    
+    # Update session state
+    st.session_state.khoi_input = khoi_input
+    st.session_state.diem_input = diem_input
+    
+    if lookup_button:
+        st.session_state.lookup_triggered = True
+        # Đóng sidebar trên mobile sau khi tra cứu
+        st.session_state.sidebar_open = False
+        st.rerun()
+    
+    # Phần còn lại của sidebar
+    create_sidebar_additional_content()
+    
+    return khoi_input, diem_input, lookup_button
+
+def render_sidebar():
+    """Render sidebar với logic đơn giản hơn"""
+    # Hiển thị sidebar khi sidebar_open = True
+    if st.session_state.sidebar_open:
+        with st.sidebar:
+            return create_sidebar_content()
+    else:
+        # Nếu sidebar đóng, trả về giá trị từ session state
+        return (
+            st.session_state.khoi_input,
+            st.session_state.diem_input,
+            False  # lookup_button = False khi sidebar đóng
+        )
+
+# =============================================================================
+# DATA LOADING FUNCTIONS
+# =============================================================================
 
 @st.cache_data
 def load_data():
@@ -304,6 +518,10 @@ def load_histogram_data():
 def load_top_2024_data():
     """Load data for 2024 top percentage thresholds"""
     return pd.read_csv("lookup_2025_18_7_top_2024.csv")
+
+# =============================================================================
+# UTILITY FUNCTIONS
+# =============================================================================
 
 def create_animated_metric_card(title, value, delta=None, icon="📊"):
     delta_html = f'<div class="metric-delta" style="color: #28a745;">▲ {delta}</div>' if delta else ""
@@ -663,324 +881,243 @@ def get_region_subtext(region):
     }
     return subtexts.get(region, '')
 
-# Load data
-df = load_data()  # For calculations
-df_histogram = load_histogram_data()  # For histogram visualization
-df_2024 = load_top_2024_data()  # For 2024 comparison
+def format_region_result(df, diem_input, khoi_input, region):
+    """Format kết quả cho từng vùng"""
+    df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
+    df_region = df_region.sort_values('diem_moc')
+    df_region['cumsum'] = df_region['count_exact'].cumsum()
+    total = df_region['count_exact'].sum()
 
-# Mobile sidebar solution using session state
-if 'sidebar_open' not in st.session_state:
-    st.session_state.sidebar_open = True
+    user_row = df_region[df_region['diem_moc'] == diem_input]
+    if user_row.empty:
+        return None
 
-# Add custom mobile sidebar toggle
-col_toggle, col_spacer = st.columns([1, 10])
-with col_toggle:
-    if st.button("☰", key="mobile_toggle", help="Mở/đóng menu"):
-        st.session_state.sidebar_open = not st.session_state.sidebar_open
+    surpassed = int(user_row['cumsum'].values[0])
+    percentile = 100 * surpassed / total
+    rank = int(total - surpassed + 1)
 
-# Info Header
-st.markdown("""
-<div class="info-header">
-    📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of 
-    <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank" class="company-name">MazHocData</a> | 
-    <a href="https://www.linkedin.com/in/ntrunghieu/" target="_blank">💼 LinkedIn</a>
-</div>
-""", unsafe_allow_html=True)
+    return {
+        'top_percent': 100 - percentile,
+        'higher_than_count': surpassed,
+        'rank': rank,
+        'total': int(total),
+        'percentile': percentile
+    }
 
-# Header
-st.markdown("""
-<div class="main-header">
-    <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
-    <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
-</div>
-""", unsafe_allow_html=True)
+# =============================================================================
+# MAIN APPLICATION
+# =============================================================================
 
-# Sidebar (conditional display for mobile)
-if st.session_state.sidebar_open or st.session_state.get('force_sidebar', False):
-    with st.sidebar:
-        st.markdown("### 📚 Thiết lập tra cứu")
-        
-        st.markdown("---")
-        
-        # Inputs
-        khoi_input = st.selectbox(
-            "📚 Chọn khối thi",
-            sorted(df['khoi'].unique()),
-            help="Chọn khối thi bạn muốn tra cứu"
-        )
-        
-        diem_input = st.number_input(
-            "🎯 Nhập tổng điểm",
-            min_value=0.0,
-            max_value=30.0,
-            value=21.0,
-            step=0.05,
-            help="Nhập tổng điểm của bạn (0-30)"
-        )
-        
-        lookup_button = st.button("🔍 Tra cứu ngay", use_container_width=True)
-        
-        # Thông tin bổ sung
-        st.markdown("---")
-        
-        # Tips section
-        st.markdown("### 💡 Gợi ý")
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); 
-                    padding: 1rem; border-radius: 10px; margin: 0.5rem 0;">
-            <p style="margin: 0; font-size: 0.85rem; color: #495057;">
-                <strong>🎯 Điểm cao:</strong> ≥ 24 điểm<br>
-                <strong>📈 Điểm khá:</strong> 18-24 điểm<br>
-                <strong>⚖️ Điểm trung bình:</strong> < 18 điểm
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Help section
-        st.markdown("### ❓ Trợ giúp")
-        with st.expander("📖 Cách sử dụng"):
-            st.markdown("""
-            1. **Chọn khối thi** của bạn
-            2. **Nhập điểm tổng** (3 môn cộng lại)
-            3. **Nhấn tra cứu** để xem kết quả
-            4. **Xem biểu đồ** và bảng thống kê chi tiết
-            """)
-        
-        with st.expander("🤔 Câu hỏi thường gặp"):
-            st.markdown("""
-            **Q: Điểm tôi nhập có chính xác không?**  
-            A: Đảm bảo cộng đúng tổng 3 môn thi
-            
-            **Q: Thứ hạng có ý nghĩa gì?**  
-            A: Vị trí của bạn so với tất cả thí sinh cùng khối
-            
-            **Q: Dữ liệu từ nguồn nào?**  
-            A: Từ kết quả thi chính thức năm 2025
-            """)
-        
-        # Contact info
-        st.markdown("---")
-        st.markdown("""
-        <div style="text-align: center; padding: 0.5rem;">
-            <p style="margin: 0; font-size: 0.8rem; color: #6c757d;">
-                💬 Cần hỗ trợ? Liên hệ qua<br>
-                <a href="https://www.facebook.com/madzyandlucas" target="_blank" 
-                   style="color: #667eea; text-decoration: none;">
-                   Facebook
-                </a> 
-                hoặc 
-                <a href="https://madzynguyen.com" target="_blank" 
-                   style="color: #667eea; text-decoration: none;">
-                   Website
-                </a>
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # DON'T close sidebar after search - keep it open for multiple searches
-        # This fixes the bug where users can't change inputs after first search
-else:
-    # Create hidden inputs to maintain state
-    khoi_input = st.session_state.get('khoi_input', sorted(df['khoi'].unique())[0])
-    diem_input = st.session_state.get('diem_input', 21.0)
-    lookup_button = st.session_state.get('lookup_button', False)
-
-# Store input values in session state
-st.session_state.khoi_input = khoi_input
-st.session_state.diem_input = diem_input
-
-# Main content
-if lookup_button:
+def main():
+    """Hàm main với sidebar handling được cải tiến"""
     
-    def format_region_result(df, diem_input, region):
-        df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)].copy()
-        df_region = df_region.sort_values('diem_moc')
-        df_region['cumsum'] = df_region['count_exact'].cumsum()
-        total = df_region['count_exact'].sum()
-
-        user_row = df_region[df_region['diem_moc'] == diem_input]
-        if user_row.empty:
-            return None
-
-        surpassed = int(user_row['cumsum'].values[0])
-        percentile = 100 * surpassed / total
-        rank = int(total - surpassed + 1)
-
-        return {
-            'top_percent': 100 - percentile,
-            'higher_than_count': surpassed,
-            'rank': rank,
-            'total': int(total),
-            'percentile': percentile
-        }
+    # 1. Khởi tạo session state
+    initialize_session_state()
     
-    # Only one tab now - Kết quả chi tiết
-    st.markdown('<div class="fade-in">', unsafe_allow_html=True)
+    # 2. Load data
+    df = load_data()
+    df_histogram = load_histogram_data()
+    df_2024 = load_top_2024_data()
     
-    # Quick overview metrics
-    col1, col2, col3, col4 = st.columns(4)
+    # 3. Tạo mobile toggle button
+    create_mobile_toggle_button()
     
-    regions = ['Cả nước', 'Miền Bắc', 'Miền Nam']
-    region_icons = ['🌍', '⛰️', '🏖️']
-    
-    results = {}
-    for region in regions:
-        results[region] = format_region_result(df, diem_input, region)
-    
-    # Display metrics
-    for i, (region, icon) in enumerate(zip(regions, region_icons)):
-        result = results[region]
-        if result:
-            # Get total students for this region
-            df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)]
-            total_students = df_region['count_exact'].sum()
-            
-            with [col1, col2, col3][i]:
-                st.markdown(create_animated_metric_card(
-                    f"Top % - {region}",
-                    f"{result['top_percent']:.1f}%",
-                    delta=f"Tổng: {total_students:,} thí sinh",
-                    icon=icon
-                ), unsafe_allow_html=True)
-    
-    with col4:
-        # Get ranking compared to entire country
-        country_result = results['Cả nước']
-        ranking_info = f"#{country_result['rank']:,} / {country_result['total']:,}" if country_result else "N/A"
-        
-        st.markdown(create_animated_metric_card(
-            "Điểm của bạn",
-            f"{diem_input:.2f}",
-            delta=f"Xếp hạng: {ranking_info}",
-            icon="🎯"
-        ), unsafe_allow_html=True)
-    
-    # 2024 Comparison Section
-    st.markdown("### 📅 So sánh với năm 2024")
+    # 4. Info Header
     st.markdown("""
-    <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #ffc107;">
-        <p style="margin: 0; color: #856404; font-size: 0.9rem;">
-            <strong>💡 Thông tin:</strong> Nếu điểm số này thi vào năm 2024, bạn sẽ đạt top % như sau:
-        </p>
+    <div class="info-header">
+        📊 Data được xử lý và phân tích bởi <span class="author-name">Hieu Nguyen</span> - Founder of 
+        <a href="https://madzynguyen.com/product/master-analytical-thinking-data-analysis-with-power-bi/?utm_source=web&utm_medium=maz&utm_campaign=web_diemthi_link&utm_id=web_diemthi&utm_content=web_diemthi" target="_blank" class="company-name">MazHocData</a> | 
+        <a href="https://www.linkedin.com/in/ntrunghieu/" target="_blank">💼 LinkedIn</a>
     </div>
     """, unsafe_allow_html=True)
     
-    col1_2024, col2_2024, col3_2024 = st.columns(3)
-    
-    for i, (region, icon) in enumerate(zip(regions, region_icons)):
-        comparison_2024 = get_2024_top_percentage(df_2024, khoi_input, region, diem_input)
-        
-        with [col1_2024, col2_2024, col3_2024][i]:
-            if comparison_2024:
-                if comparison_2024["top_percent"] == ">100":
-                    st.markdown(create_animated_metric_card(
-                        f"2024 - {region}",
-                        "Ngoài top 100%",
-                        delta="Điểm chưa đủ",
-                        icon="📉"
-                    ), unsafe_allow_html=True)
-                else:
-                    # So sánh với kết quả 2025
-                    current_result = results[region]
-                    if current_result:
-                        current_top = current_result['top_percent']
-                        comparison_2024_num = float(comparison_2024["top_percent"].replace('%', ''))
-                        
-                        if comparison_2024_num < current_top:
-                            trend = f"Tốt hơn {current_top - comparison_2024_num:.1f}%"
-                            trend_color = "#28a745"
-                        elif comparison_2024_num > current_top:
-                            trend = f"Kém hơn {comparison_2024_num - current_top:.1f}%"
-                            trend_color = "#dc3545"
-                        else:
-                            trend = "Tương đương"
-                            trend_color = "#ffc107"
-                    else:
-                        trend = ""
-                        trend_color = "#666"
-                    
-                    st.markdown(f"""
-                    <div class="metric-card fade-in">
-                        <div class="metric-title">{icon} 2024 - {region}</div>
-                        <div class="metric-value">Top {comparison_2024["top_percent"]}</div>
-                        <div class="metric-delta" style="color: {trend_color};">
-                            {trend}
-                        </div>
-                    </div>
-                    """, unsafe_allow_html=True)
-    
-    # Detailed results for each region with histogram
-    for region, icon in zip(regions, region_icons):
-        result = results[region]
-        if result:
-            st.markdown(f"""
-            <div class="results-container fade-in">
-                <div class="region-header">
-                    <div class="region-title-row">
-                        <span class="region-icon">{icon}</span>
-                        <h2 class="region-title">{region}</h2>
-                    </div>
-                    <div class="region-subtext">{get_region_subtext(region)}</div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Desktop: side by side layout
-            col_metrics, col_chart = st.columns([1, 2])
-            
-            with col_metrics:
-                st.metric(
-                    "🏆 Xếp hạng top",
-                    f"{result['top_percent']:.2f}%",
-                    delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
-                )
-                
-                st.metric(
-                    "📊 Thứ hạng",
-                    f"{result['rank']:,}",
-                    delta=f"Trên tổng {result['total']:,} thí sinh"
-                )
-                
-                st.metric(
-                    "📈 Phân vị", 
-                    f"{result['percentile']:.1f}",
-                    delta="percentile"
-                )
-            
-            with col_chart:
-                fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
-                st.plotly_chart(fig_histogram, use_container_width=True)
-            
-            # Thêm bảng thống kê phân bổ điểm với parameters đầy đủ
-            display_score_breakdown_section(df, khoi_input, region, diem_input, result)
-            
-            st.markdown("</div>", unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-else:
-    # Welcome screen
+    # 5. Header
     st.markdown("""
-    <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
-        <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
-        <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
-            Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
-            để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
-        </p>
-        <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
-            <div style="text-align: center;">
-                <div style="font-size: 3rem;">📊</div>
-                <h4>Phân tích chi tiết</h4>
-                <p>Xem thứ hạng và phân vị của bạn với biểu đồ tương tác</p>
+    <div class="main-header">
+        <h1 class="main-title">🎯 Tra cứu thứ hạng điểm thi 2025</h1>
+        <p class="main-subtitle">Khám phá vị trí của bạn trong bảng xếp hạng toàn quốc với giao diện hiện đại</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 6. Render sidebar với logic đơn giản
+    khoi_input, diem_input, lookup_button = render_sidebar()
+    
+    # 7. Main content - chỉ cần check lookup_triggered
+    if st.session_state.lookup_triggered and khoi_input and diem_input:
+        
+        st.markdown('<div class="fade-in">', unsafe_allow_html=True)
+        
+        # Quick overview metrics
+        col1, col2, col3, col4 = st.columns(4)
+        
+        regions = ['Cả nước', 'Miền Bắc', 'Miền Nam']
+        region_icons = ['🌍', '⛰️', '🏖️']
+        
+        results = {}
+        for region in regions:
+            results[region] = format_region_result(df, diem_input, khoi_input, region)
+        
+        # Display metrics
+        for i, (region, icon) in enumerate(zip(regions, region_icons)):
+            result = results[region]
+            if result:
+                # Get total students for this region
+                df_region = df[(df['khoi'] == khoi_input) & (df['view'] == region)]
+                total_students = df_region['count_exact'].sum()
+                
+                with [col1, col2, col3][i]:
+                    st.markdown(create_animated_metric_card(
+                        f"Top % - {region}",
+                        f"{result['top_percent']:.1f}%",
+                        delta=f"Tổng: {total_students:,} thí sinh",
+                        icon=icon
+                    ), unsafe_allow_html=True)
+        
+        with col4:
+            # Get ranking compared to entire country
+            country_result = results['Cả nước']
+            ranking_info = f"#{country_result['rank']:,} / {country_result['total']:,}" if country_result else "N/A"
+            
+            st.markdown(create_animated_metric_card(
+                "Điểm của bạn",
+                f"{diem_input:.2f}",
+                delta=f"Xếp hạng: {ranking_info}",
+                icon="🎯"
+            ), unsafe_allow_html=True)
+        
+        # 2024 Comparison Section
+        st.markdown("### 📅 So sánh với năm 2024")
+        st.markdown("""
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; margin: 1rem 0; border-left: 4px solid #ffc107;">
+            <p style="margin: 0; color: #856404; font-size: 0.9rem;">
+                <strong>💡 Thông tin:</strong> Nếu điểm số này thi vào năm 2024, bạn sẽ đạt top % như sau:
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1_2024, col2_2024, col3_2024 = st.columns(3)
+        
+        for i, (region, icon) in enumerate(zip(regions, region_icons)):
+            comparison_2024 = get_2024_top_percentage(df_2024, khoi_input, region, diem_input)
+            
+            with [col1_2024, col2_2024, col3_2024][i]:
+                if comparison_2024:
+                    if comparison_2024["top_percent"] == ">100":
+                        st.markdown(create_animated_metric_card(
+                            f"2024 - {region}",
+                            "Ngoài top 100%",
+                            delta="Điểm chưa đủ",
+                            icon="📉"
+                        ), unsafe_allow_html=True)
+                    else:
+                        # So sánh với kết quả 2025
+                        current_result = results[region]
+                        if current_result:
+                            current_top = current_result['top_percent']
+                            comparison_2024_num = float(comparison_2024["top_percent"].replace('%', ''))
+                            
+                            if comparison_2024_num < current_top:
+                                trend = f"Tốt hơn {current_top - comparison_2024_num:.1f}%"
+                                trend_color = "#28a745"
+                            elif comparison_2024_num > current_top:
+                                trend = f"Kém hơn {comparison_2024_num - current_top:.1f}%"
+                                trend_color = "#dc3545"
+                            else:
+                                trend = "Tương đương"
+                                trend_color = "#ffc107"
+                        else:
+                            trend = ""
+                            trend_color = "#666"
+                        
+                        st.markdown(f"""
+                        <div class="metric-card fade-in">
+                            <div class="metric-title">{icon} 2024 - {region}</div>
+                            <div class="metric-value">Top {comparison_2024["top_percent"]}</div>
+                            <div class="metric-delta" style="color: {trend_color};">
+                                {trend}
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+        
+        # Detailed results for each region with histogram
+        for region, icon in zip(regions, region_icons):
+            result = results[region]
+            if result:
+                st.markdown(f"""
+                <div class="results-container fade-in">
+                    <div class="region-header">
+                        <div class="region-title-row">
+                            <span class="region-icon">{icon}</span>
+                            <h2 class="region-title">{region}</h2>
+                        </div>
+                        <div class="region-subtext">{get_region_subtext(region)}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Desktop: side by side layout
+                col_metrics, col_chart = st.columns([1, 2])
+                
+                with col_metrics:
+                    st.metric(
+                        "🏆 Xếp hạng top",
+                        f"{result['top_percent']:.2f}%",
+                        delta=f"Cao hơn {result['higher_than_count']:,} thí sinh"
+                    )
+                    
+                    st.metric(
+                        "📊 Thứ hạng",
+                        f"{result['rank']:,}",
+                        delta=f"Trên tổng {result['total']:,} thí sinh"
+                    )
+                    
+                    st.metric(
+                        "📈 Phân vị", 
+                        f"{result['percentile']:.1f}",
+                        delta="percentile"
+                    )
+                
+                with col_chart:
+                    fig_histogram = create_region_histogram(df_histogram, khoi_input, region, diem_input)
+                    st.plotly_chart(fig_histogram, use_container_width=True)
+                
+                # Thêm bảng thống kê phân bổ điểm với parameters đầy đủ
+                display_score_breakdown_section(df, khoi_input, region, diem_input, result)
+                
+                st.markdown("</div>", unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    else:
+        # Welcome screen
+        st.markdown("""
+        <div class="results-container fade-in" style="text-align: center; padding: 3rem;">
+            <h2>🚀 Chào mừng đến với hệ thống tra cứu điểm thi hiện đại!</h2>
+            <p style="font-size: 1.1rem; color: #666; margin: 2rem 0;">
+                Nhập thông tin của bạn ở sidebar bên trái và nhấn nút <strong>"Tra cứu ngay"</strong> 
+                để khám phá vị trí của mình trong bảng xếp hạng toàn quốc.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 2rem;">
+                <div style="text-align: center;">
+                    <div style="font-size: 3rem;">📊</div>
+                    <h4>Phân tích chi tiết</h4>
+                    <p>Xem thứ hạng và phân vị của bạn với biểu đồ tương tác</p>
+                </div>
             </div>
         </div>
+        """, unsafe_allow_html=True)
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; color: #666; padding: 1rem;">
+        <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ HieuNguyen</p>
+        <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
     </div>
     """, unsafe_allow_html=True)
 
-# Footer
-st.markdown("---")
-st.markdown("""
-<div style="text-align: center; color: #666; padding: 1rem;">
-    <p>🎯 <strong>Tra cứu điểm thi 2025</strong> | Được xây dựng với ❤️ HieuNguyen</p>
-    <p style="font-size: 0.9rem;">💡 Dữ liệu được cập nhật từ kết quả thi chính thức</p>
-</div>
-""", unsafe_allow_html=True)
+# =============================================================================
+# RUN APPLICATION
+# =============================================================================
+
+if __name__ == "__main__":
+    main()
