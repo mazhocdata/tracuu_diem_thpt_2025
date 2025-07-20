@@ -422,13 +422,6 @@ def create_sidebar_additional_content():
 
 def create_sidebar_content():
     """Tạo nội dung sidebar - tách riêng để dễ maintain"""
-    # Close button cho mobile
-    col_close, col_spacer = st.columns([1, 4])
-    with col_close:
-        if st.button("✕", key="close_sidebar", help="Đóng menu"):
-            st.session_state.sidebar_open = False
-            st.rerun()
-    
     st.markdown("### 📚 Thiết lập tra cứu")
     st.markdown("---")
     
